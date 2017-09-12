@@ -1,0 +1,22 @@
+{
+  "name": "slidin",
+  "description": "Carousel Image Slider",
+  "main": "slidin.js",
+  "authors": [
+    "Jessica F Martinez"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "slider",
+    "carousel"
+  ],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

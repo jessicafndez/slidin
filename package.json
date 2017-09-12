@@ -1,0 +1,14 @@
+{
+  "name": "slidin",
+  "version": "1.0.0",
+  "description": "Carousel Slider Image",
+  "main": "slidin/slidin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jessica F Martinez",
+  "license": "ISC",
+  "peerDependencies": {
+    "jquery": ">=1.7.2"
+  }
+}
