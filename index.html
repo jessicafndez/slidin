@@ -19,14 +19,16 @@
                 display: block;
             }
             .slidin-slide {
-                width: 100%;
                 float: left;             
                 min-height: 1px;
             }
+            /*
             .slidin-slide img {
                 margin: 0 auto;
+                display: block;
                 width: 100%;
             }
+            */
             .slider-block {
                 position: relative;
                 display: block;
@@ -34,13 +36,49 @@
                 margin: 0;
                 padding: 0;
             }
-  
+            .slider-row {
+                width:1800px;
+                -webkit-transition:all 1.0s ease-in-out;
+                -moz-transition:all 1.0s ease-in-out;
+                -o-transition:all 1.0s ease-in-out;
+                transition:all 1.0s ease-in-out;
+            }
+            .slider-row img {
+                padding:0;
+                margin:0;
+                float:left;
+            }
+            .slidin-list {
+                display: block;
+                overflow: hidden;
+                margin: 0;
+                padding: 0;
+                position: absolute;
+                width: 100%;
+            }
+            .slidin-track {
+                width:350px;
+                height:281px;
+                overflow:hidden;
+                margin:0 auto;
+            }
+            .slidin-slide {
+                position: relative;
+            }
+
+            .slidin-slide {
+               /* transform: translateX(-700px);*/
+            }
         </style>
     </head>
     <body>
         <div class="content">
+            <button type="button" data-role="none" class="slick-prev slick-arrow" 
+                aria-label="Previous" role="button" style="display: block;">
+                Previous
+            </button>
             <div class="dinamic-carousel slider-block">
-                <div class="slider-row">
+                <div class="slider-row" style="background-color: red">
                     <div>
                         <img src="http://placehold.it/350x100?text=1">
                     </div>
@@ -55,22 +93,26 @@
                     </div>
                 </div>
             </div>
+            <button type="button" data-role="none" class="slick-next slick-arrow"
+                aria-label="Next" role="button" style="display: block;">
+                Next
+            </button>
         </div>
         
 
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script type="text/javascript" src="slidin/slidin.js"></script>
         <script type="text/javascript">
-             $(document).ready (function() {
+             $(document).ready(function() {
                 $(".dinamic-carousel").slidin({
                     autoPlay: true,
                     centerAlign: true,
                     dots: true,
+                    loop: true,
                     maxHeight: 'auto',
-                    slidesToShow: 4,
-                    slidesToScroll: 2,
-                    slidersPerView: 2,
+                    slidesToScroll: 1,
                     slidesHorizontal: true,
+                    speed: 2000,
                     vertical: true,
                 });
             });
