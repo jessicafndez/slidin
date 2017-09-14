@@ -45,11 +45,20 @@
 
             //Variables
             _.$slider = $(element);
+
+            //in future we need to clean this sh**
             _.$sliderRow = $('.slider-row');
 
             //Max heigh of our slider
             _.maxImageHeight = 0;
             _.maxWidth = 0;
+
+            _.numOfSliders = 0;
+
+            //Current slider
+            _.currentSlider = 0;
+
+            //Special functions
 
             dataSettings = $(element).data('slidin') || {};
             _.options = $.extend({}, _.defaults, settings, dataSettings);
@@ -63,12 +72,74 @@
     Slidin.prototype.loadAll = function() {
         var _ = this;
         $(window).on("load", function(){
-
             //Initial design
             _.setDimension();
+            _.setArrows();
+
+            _.handleArrows();
+
             _.init(true);
             _.autoPlay();
         });
+    }
+
+    Slidin.prototype.handleArrows = function() {
+        var _ = this;
+        
+        _.leftArrow = $('.slidin-prev');
+        _.rightArrow = $('.slidin-next');
+        
+        _.leftArrow.click(function(){
+           _.handlePrevSlider();
+        });
+
+        _.rightArrow.click(function() {
+            _.handleNextSlider();
+        });
+    }
+
+    Slidin.prototype.handlePrevSlider = function() {
+        var _ = this,
+             actualSlider = _.getCurrentSlider();
+
+        //Loop model enable
+        if(_.options.loop) {
+            //Mean we aren't in first slider
+            if($('.slider-selected').prev().length) {
+                _.changeCurrentSlider(actualSlider-1);
+            }
+            else {
+                //go to last slider
+                _.changeCurrentSlider(_.numOfSliders);
+            }
+        }
+        else {
+
+        }
+    }
+
+    Slidin.prototype.handleNextSlider = function() {
+        console.log("R");
+    }
+
+    Slidin.prototype.setArrows = function() {
+        var _ = this;
+        if(!_.options.arrows) {
+            $('.slidin-arrow').css({
+                'display': 'none',
+                'visibility': 'hidden'
+            });
+        }
+    }
+
+    Slidin.prototype.setDots = function() {
+        var _ = this;
+        if(!_.options.dots) {
+            $('.slidin-dots').css({
+                'display': 'none',
+                'visibility': 'hidden'
+            });
+        }
     }
    
     Slidin.prototype.setDimension = function() {
@@ -89,9 +160,11 @@
         }
 
         _.$sliderRow.children().each(function(index, element) {
+            /*
             if($(element).children().height()>_.maxImageHeight) {
                 _.maxImageHeight=$(element).children().height();
             }
+            */
             if($(element).children().width()>_.maxWidth) {
                 _.maxWidth=$(element).children().width() + 100;
             }
@@ -107,9 +180,6 @@
         */
 
         _.slidesNumber = _.$sliderRow.children().length;
-       // _.$slides = _.$slideTrack.children(this.options.slide);
-        console.log("Childrens: ");
-        console.log(_.slidesNumber );
 
         _.$slideTrack = (_.slidesNumber === 0) ?
             $('<div class="slidin-track"/>').appendTo(_.$slider) :
@@ -126,7 +196,6 @@
     }
 
     Slidin.prototype.init = function(creation) {
-        console.log("Init");
         var _ = this;
         if (!$(_.$slider).hasClass('slidin-initialized')) {
             $(_.$slider).addClass('slidin-initialized');
@@ -141,9 +210,9 @@
     };
 
     Slidin.prototype.build = function() {
-        var _ = this, numOfSliders;
-        var maxSliderHeight = 0,
-        numOfSliders = $(_.$sliderRow).children();
+        var _ = this;
+        var maxSliderHeight = 0;
+        _.numOfSliders = $(_.$sliderRow).children();
 
         $(_.$sliderRow).children().addClass('slidin-slide');
 
@@ -189,22 +258,26 @@
 
     Slidin.prototype.loopMode = function() {
         var _ = this;
+    }
 
-        
+    Slidin.prototype.getCurrentSlider = function() {
+        var _ = this;
+        return _.currentSlider;
     }
 
     Slidin.prototype.startSlider = function() {
         //Start with first slider
-        var _ = this,
-                currentIndex = 1;
+        var _ = this;
 
         var sliderAnimation = setInterval(function() {
-            _.$sliderRow.eq(currentIndex).addClass("slider_selected");
+            var currentIndex = _.getCurrentSlider();
+            _.changeCurrentSlider(currentIndex);
 
             var currentTransition = (-350) * currentIndex;
             _.$sliderRow.css({
                 'transform': 'translateX('+ currentTransition +'px)'
             });
+
             currentIndex++;
             if(currentIndex == _.$sliderRow.children().length) {
                 if(_.options.loop === true) {
@@ -215,6 +288,13 @@
                 }
             }  
         }, _.options.speed);
+    }
+
+    Slidin.prototype.changeCurrentSlider = function(currentIndex) {
+        var _ = this;
+        _.$sliderRow.children().removeClass("slider-selected");
+        _.$sliderRow.children().eq(currentIndex).addClass("slider-selected");
+        _.currentSlider = currentIndex;
     }
 
     $.fn.slidin = function() {
