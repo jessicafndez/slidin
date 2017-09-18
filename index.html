@@ -27,13 +27,6 @@
                 float: left;             
                 min-height: 1px;
             }
-            /*
-            .slidin-slide img {
-                margin: 0 auto;
-                display: block;
-                width: 100%;
-            }
-            */
             .slider-block {
                 position: relative;
                 display: block;
@@ -43,7 +36,6 @@
                 width: 350px;
             }
             .slider-row {
-                width:1800px;
                 -webkit-transition:all 1.0s ease-in-out;
                 -moz-transition:all 1.0s ease-in-out;
                 -o-transition:all 1.0s ease-in-out;
@@ -63,13 +55,6 @@
                 width: 100%;
             }
             .slidin-track {
-                /*
-                width:350px;
-                height:281px;
-                overflow:hidden;
-                margin:0 auto;
-                padding-top: 100px;
-                */
                 position: relative;
                 top: 0;
                 left: 0;
@@ -78,7 +63,6 @@
             .slidin-slide {
                 position: relative;
             }
-
             .slidin-prev {
                 left: 30%;
             }
@@ -116,7 +100,6 @@
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
             }
-
         </style>
     </head>
     <body>
@@ -146,11 +129,13 @@
                     aria-label="Next" role="button" style="display: block;">
                     Next
                 </button>
+                <!--
                 <div class="slidin-dots">
                     <ul>
                         <li></li>
                     </ul>
                 </div>
+                -->
             </div>
         </div>
         
@@ -159,7 +144,7 @@
         <script type="text/javascript">
              $(document).ready(function() {
                 $(".dinamic-carousel").slidin({
-                    autoPlay: true,
+                    autoPlay: false,
                     arrows: true,
                     centerAlign: true,
                     dots: true,

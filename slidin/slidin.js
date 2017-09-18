@@ -13,10 +13,10 @@
     Slidin = (function() {
 
         function Slidin(element, settings) {
-            var _ = this, dataSettings;
-            console.log("Welcome 3");
+            var self = this, dataSettings;
+            console.log("*** Welcome to Slin Carousel ***");
 
-            _.defaults =  {
+            self.defaults =  {
                 adaptativeHeigh: false,
                 arrows: false,
                 prevArrow: '<button class="slidin-prev" aria-label="Previous" type="button">Previous</button>',
@@ -36,105 +36,120 @@
                 vertical: true,
             }
 
-            _.defaultInit = {
+            self.defaultInit = {
                 $list: null
             }
 
-            //Adding to 'this'
-            $.extend(_, _.defaultInit);
+            $.extend(self, self.defaultInit);
 
-            //Variables
-            _.$slider = $(element);
+            self.$slider = $(element);
+            self.$sliderRow = $('.slider-row');
 
-            //in future we need to clean this sh**
-            _.$sliderRow = $('.slider-row');
+            self.maxImageHeight = 0;
+            self.maxWidth = 0;
+            self.numOfSliders = 0;
+            self.carouselWidth = 0;
 
-            //Max heigh of our slider
-            _.maxImageHeight = 0;
-            _.maxWidth = 0;
-
-            _.numOfSliders = 0;
-
-            //Current slider
-            _.currentSlider = 0;
-
-            //Special functions
+            self.currentSlider = 0;
 
             dataSettings = $(element).data('slidin') || {};
-            _.options = $.extend({}, _.defaults, settings, dataSettings);
+            self.options = $.extend({}, self.defaults, settings, dataSettings);
 
-            _.loadAll();
+            self.loadAll();
         }
-
         return Slidin;
     })();
 
     Slidin.prototype.loadAll = function() {
-        var _ = this;
+        var self = this;
         $(window).on("load", function(){
-            //Initial design
-            _.setDimension();
-            _.setArrows();
-
-            _.handleArrows();
-
-            _.init(true);
-            _.autoPlay();
+            self.setDimension();
+            self.handleArrows();
+            self.init(true);
+            self.autoPlay();
         });
     }
 
     Slidin.prototype.handleArrows = function() {
-        var _ = this;
-        
-        _.leftArrow = $('.slidin-prev');
-        _.rightArrow = $('.slidin-next');
-        
-        _.leftArrow.click(function(){
-           _.handlePrevSlider();
-        });
+        var self = this;
+        self.leftArrow = $('.slidin-prev');
+        self.rightArrow = $('.slidin-next');
 
-        _.rightArrow.click(function() {
-            _.handleNextSlider();
+        self.setArrows();
+        
+        self.leftArrow.click(function(){
+            self.handlePrevSlider();
+        });
+    
+        self.rightArrow.click(function() {
+            self.handleNextSlider();
         });
     }
 
     Slidin.prototype.handlePrevSlider = function() {
-        var _ = this,
-             actualSlider = _.getCurrentSlider();
+        var self = this,
+            currentIndex = self.getCurrentSlider();
 
-        //Loop model enable
-        if(_.options.loop) {
-            //Mean we aren't in first slider
-            if($('.slider-selected').prev().length) {
-                _.changeCurrentSlider(actualSlider-1);
-            }
-            else {
-                //go to last slider
-                _.changeCurrentSlider(_.numOfSliders);
-            }
+            console.log("Current index: " + currentIndex);
+
+        if(currentIndex > 0) {
+            self.changeCurrentSlider(currentIndex-1);
+            self.moveLeft();
         }
         else {
-
+            //no idea
         }
     }
 
     Slidin.prototype.handleNextSlider = function() {
-        console.log("R");
+        console.log("***Right***");
+        var self = this,
+            currentIndex = self.getCurrentSlider();
+        if(currentIndex < self.numOfSliders) {
+            self.changeCurrentSlider(currentIndex+1);
+            self.moveRight();
+        }   
+        else {
+            //No idea
+        }
+    }
+
+    Slidin.prototype.moveRight = function() {
+        var self = this;
+        console.log("Current: " + self.getCurrentSlider());
+        var currentTransition = (-350) * self.getCurrentSlider();
+        console.log("Righ transition: " + currentTransition);
+        self.move(currentTransition);
+    }
+
+    Slidin.prototype.moveLeft = function() {
+        var self = this;
+        console.log("Current: " + self.getCurrentSlider());
+        var currentPosition = 350 + (-350 * self.getCurrentSlider() -1);
+      //  var currentTransition = (350) * self.getCurrentSlider();
+        console.log("Left transition: " + currentPosition);
+        self.move(currentPosition);
+    }
+
+    Slidin.prototype.move = function(currentTransition) {
+        var self = this;
+        self.$sliderRow.css({
+            'transform': 'translateX('+ currentTransition +'px)'
+        });
     }
 
     Slidin.prototype.setArrows = function() {
-        var _ = this;
-        if(!_.options.arrows) {
+        var self = this;
+        if(!self.options.arrows) {
             $('.slidin-arrow').css({
                 'display': 'none',
                 'visibility': 'hidden'
             });
         }
     }
-
     Slidin.prototype.setDots = function() {
-        var _ = this;
-        if(!_.options.dots) {
+        var self = this;
+        if(!self.options.dots) {
             $('.slidin-dots').css({
                 'display': 'none',
                 'visibility': 'hidden'
@@ -143,66 +158,43 @@
     }
    
     Slidin.prototype.setDimension = function() {
-        var _ = this;
-
-        //Sliders horizontal
-        if(_.options.vertical === false) {
+        var self = this;
+        if(self.options.vertical === false) {
             console.log("horizontal");
-            if (_.options.centerAlign === true) {
-                _.$list.css({
-                    padding: ('0px ' + _.options.centerPadding)
+            if (self.options.centerAlign === true) {
+                self.$list.css({
+                    padding: ('0px ' + self.options.centerPadding)
                 });
             }
         }
-        //Sliders vertical
         else {
             console.log("vertical");
         }
 
-        _.$sliderRow.children().each(function(index, element) {
-            /*
-            if($(element).children().height()>_.maxImageHeight) {
-                _.maxImageHeight=$(element).children().height();
-            }
-            */
-            if($(element).children().width()>_.maxWidth) {
-                _.maxWidth=$(element).children().width() + 100;
+        self.$sliderRow.children().each(function(index, element) {
+            if(self.$slider.children().width()>self.maxWidth) {
+                self.maxWidth=self.$slider.children().width() + 100;
             }
         });
 
-        $(_.$slider).css({
-            'height':  _.maxImageHeight + 100,
+        $(self.$slider).css({
+            'height':  self.maxImageHeight + 100,
         });
-        /*
-        $(_.$sliderRow).css({
-            'width': _.maxWidth
-        });
-        */
 
-        _.slidesNumber = _.$sliderRow.children().length;
-
-        _.$slideTrack = (_.slidesNumber === 0) ?
+        self.slidesNumber = self.$sliderRow.children().length;
+        self.$slideTrack = (self.slidesNumber === 0) ?
             $('<div class="slidin-track"/>').appendTo(_.$slider) :
-            _.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
+            self.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
 
-        _.$slidersList = _.$slideTrack.wrap('<div class="slidin-list"/>').parent();
-        /*
-        _.$slidersList.css({
-            'width': _.maxWidth,
-            'margin': "0 auto"
-        });
-        */
-        
+        self.$slidersList = self.$slideTrack.wrap('<div class="slidin-list"/>').parent();    
     }
 
     Slidin.prototype.init = function(creation) {
-        var _ = this;
-        if (!$(_.$slider).hasClass('slidin-initialized')) {
-            $(_.$slider).addClass('slidin-initialized');
-
-            /*Call to constructor functions*/
-            _.build();
-            _.animateSlider();
+        var self = this;
+        if (!$(self.$slider).hasClass('slidin-initialized')) {
+            $(self.$slider).addClass('slidin-initialized');
+            self.build();
+            self.animateSlider();
         }
         else {
             console.log("Has");
@@ -210,14 +202,20 @@
     };
 
     Slidin.prototype.build = function() {
-        var _ = this;
+        var self = this;
         var maxSliderHeight = 0;
-        _.numOfSliders = $(_.$sliderRow).children();
 
-        $(_.$sliderRow).children().addClass('slidin-slide');
+        self.numOfSliders = self.$sliderRow.children().length;
+        self.carouselWidth = self.maxWidth * (self.numOfSliders);
+        self.$sliderRow.css("width", self.carouselWidth);
+
+        //0 is a number!
+        self.numOfSliders -= 1;
+
+        $(self.$sliderRow).children().addClass('slidin-slide');
 
         //Add Index to each slider image
-        _.$sliderRow.children().each(function(index, element) {
+        self.$sliderRow.children().each(function(index, element) {
             $(element).attr('slider-index', index);
 
             if(index > 0) {
@@ -227,7 +225,7 @@
     }
 
     Slidin.prototype.animateSlider =  function() {
-        var _ = this;
+        var self = this;
         /*
         _.$sliderRow.children().each(function(index, element) {
             $(element).css({
@@ -239,17 +237,10 @@
     }
 
     Slidin.prototype.autoPlay = function() {
-        var _ = this;
-        if(_.options.autoPlay) {
-            //If not given, take default speed
-            console.log("autoplay yes");
-
-            //Clone first slider
-            _.loopMode();
-
-            //Star slider animation
-            _.startSlider();
-            
+        var self = this;
+        if(self.options.autoPlay) {
+            self.loopMode();
+            self.startSlider(); 
         }
         else {
             console.log("autoplay none");
@@ -257,61 +248,82 @@
     }
 
     Slidin.prototype.loopMode = function() {
-        var _ = this;
+        var self = this;
+
+        //clone first image
     }
 
     Slidin.prototype.getCurrentSlider = function() {
-        var _ = this;
-        return _.currentSlider;
+        return this.currentSlider;
     }
 
     Slidin.prototype.startSlider = function() {
-        //Start with first slider
-        var _ = this;
+        var self = this;
+
+        var firstClone = $('.slidin-slide').eq(0).clone();
+    //    var secondClone = $('.slidin-slide').eq(1).clone();
+     //   var preLastClone = $('.slidin-slide').eq(_.numOfSliders - 2).clone();
+        var lastClone = $('.slidin-slide').eq(self.numOfSliders - 1).clone();
+
+        var initialFadeIn = 1000;
+        var fadeTime = 2500;       
+        var currentIndex = self.getCurrentSlider();
+
+        $('.slidin-slide').eq(currentIndex).fadeIn(initialFadeIn);
+   
+        // _.$slider.find(_.$sliderRow).append(firstClone, secondClone);
+        // _.$slider.find(_.$sliderRow).prepend(preLastClone, lastClone);
+
+        self.$slider.find(self.$sliderRow).append(firstClone);
+        self.$slider.find(self.$sliderRow).prepend(lastClone);
+
+        self.playSlide();
+    }
+
+    Slidin.prototype.playSlide = function() {
+        var self = this;
 
         var sliderAnimation = setInterval(function() {
-            var currentIndex = _.getCurrentSlider();
-            _.changeCurrentSlider(currentIndex);
-
+            currentIndex = self.getCurrentSlider();
             var currentTransition = (-350) * currentIndex;
-            _.$sliderRow.css({
+           // $('.slidin-slide').eq(currentIndex).fadeOut(fadeTime);
+
+            if (currentIndex == (self.$sliderRow.children().length) - 1) {
+                currentIndex = 0;
+            } else {
+                currentIndex++;
+            }
+        
+            self.$sliderRow.css({
                 'transform': 'translateX('+ currentTransition +'px)'
             });
-
-            currentIndex++;
-            if(currentIndex == _.$sliderRow.children().length) {
-                if(_.options.loop === true) {
-                    currentIndex = 0;
-                }
-                else {
-                    clearInterval(sliderAnimation);
-                }
-            }  
-        }, _.options.speed);
+      
+            self.changeCurrentSlider(currentIndex);
+        }, self.options.speed);
     }
 
     Slidin.prototype.changeCurrentSlider = function(currentIndex) {
-        var _ = this;
-        _.$sliderRow.children().removeClass("slider-selected");
-        _.$sliderRow.children().eq(currentIndex).addClass("slider-selected");
-        _.currentSlider = currentIndex;
+        var self = this;
+        self.$sliderRow.children().removeClass("slider-selected");
+        self.$sliderRow.children().eq(currentIndex).addClass("slider-selected");
+        self.currentSlider = currentIndex;
     }
 
     $.fn.slidin = function() {
-        var _ = this,
+        var self = this,
             opt = arguments[0],
             args = Array.prototype.slice.call(arguments, 1),
-            l = _.length,
+            l = self.length,
             i,
             ret;
         for (i = 0; i < l; i++) {
             if (typeof opt == 'object' || typeof opt == 'undefined')
-                _[i].slick = new Slidin(_[i], opt);
+                self[i].slick = new Slidin(self[i], opt);
             else
-                ret = _[i].slick[opt].apply(_[i].slick, args);
+                ret = self[i].slick[opt].apply(self[i].slick, args);
             if (typeof ret != 'undefined') return ret;
         }
-        return _;
+        return self;
     };
 
 }));
