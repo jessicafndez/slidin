@@ -11,6 +11,9 @@
                 margin: 0 auto;
                 background-color: #CCE5FF;
             }
+            .slidin {
+                padding-top: 25%;
+            }
             .slider-block {
                 width: 100%;
             }
@@ -23,28 +26,25 @@
             .slick-initialized .slick-slide {
                 display: block;
             }
-            .slidin-slide {
-                float: left;             
-                min-height: 1px;
-            }
             .slider-block {
                 position: relative;
                 display: block;
                 overflow: hidden;
                 margin: 0 auto;
                 padding: 0;
-                width: 350px;
+                width: 400px;
             }
             .slider-row {
                 -webkit-transition:all 1.0s ease-in-out;
                 -moz-transition:all 1.0s ease-in-out;
                 -o-transition:all 1.0s ease-in-out;
                 transition:all 1.0s ease-in-out;
+                float: left;
+                width: 100%;
             }
             .slider-row img {
                 padding:0;
                 margin:0;
-                float:left;
             }
             .slidin-list {
                 display: block;
@@ -53,21 +53,23 @@
                 padding: 0;
                 position: absolute;
                 width: 100%;
+                float: left;
             }
             .slidin-track {
                 position: relative;
                 top: 0;
                 left: 0;
                 display: block;
+                float: left;
             }
             .slidin-slide {
                 position: relative;
             }
             .slidin-prev {
-                left: 30%;
+                left: 14%;
             }
             .slidin-next {
-                right: 30%;
+                right: 14%;
             }
             .slidin-prev, .slidin-next {
                 font-size: 0;
@@ -84,6 +86,7 @@
                 border: none;
                 outline: none;
                 background: transparent;
+                padding-top: 20%;
             }
             .slidin-next:before {
                 content: "\f061";
@@ -100,6 +103,9 @@
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
             }
+            .slidin-slide {
+                float: left;
+            }
         </style>
     </head>
     <body>
@@ -110,18 +116,18 @@
                     Previous
                 </button>
                 <div class="dinamic-carousel slider-block">
-                    <div class="slider-row" style="background-color: red">
+                    <div class="slider-row">
                         <div>
-                            <img src="http://placehold.it/350x100?text=1">
+                            <img src="images/image1.png">
                         </div>
                         <div>
-                            <img src="http://placehold.it/350x100?text=2">
+                            <img src="images/image2.png">
                         </div>
                         <div>
-                            <img src="http://placehold.it/350x100?text=3">
+                            <img src="images/image3.png">
                         </div>
                         <div>
-                            <img src="http://placehold.it/350x100?text=4">
+                            <img src="images/image4.png">
                         </div>
                     </div>
                 </div>
@@ -142,17 +148,20 @@
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script type="text/javascript" src="slidin/slidin.js"></script>
         <script type="text/javascript">
-             $(document).ready(function() {
+            $(document).ready(function() {
                 $(".dinamic-carousel").slidin({
-                    autoPlay: false,
+                    adaptativeSlider: true,
+                    autoPlay: true,
                     arrows: true,
                     centerAlign: true,
                     dots: true,
+                    fade: false,
                     loop: true,
                     maxHeight: 'auto',
                     slidesToScroll: 1,
                     slidesHorizontal: true,
                     speed: 2000,
+                    responsiveSliders: true,
                     vertical: true,
                 });
             });
