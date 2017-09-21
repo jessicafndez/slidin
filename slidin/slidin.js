@@ -29,6 +29,10 @@
                 fade: false,
                 loop: false,
                 maxHeight: 5,
+                photoBorder: false,
+                photoBorderColor: '#ffffff',
+                photoBorderDimension: 5,
+                photoBorderShadow: true,
                 sliderPerRow: 1,
                 sliderToShow: 1,
                 slidesToScroll: 1,
@@ -62,7 +66,7 @@
 
     Slidin.prototype.loadAll = function() {
         var self = this;
-        $(window).on("load", function(){
+        $(document).ready(function() {
             self.init(true);
             self.handleArrows();
             self.pauseHoverSlider();
@@ -87,7 +91,6 @@
 
     Slidin.prototype.build = function() {
         var self = this;
-        var maxSliderHeight = 0;
 
         self.numOfSliders = self.$sliderRow.children().length;
         self.numOfSliders -= 1;
@@ -98,6 +101,13 @@
         });
 
         self.setDimension();
+        self.setStyles();
+
+        //if its loop remove arrows, 4 now
+        if(!self.options.loop) {
+            $('.prevArrow').append(self.options.prevArrow);
+            $('.nextArrow').append(self.options.nextArrow);
+        }
     }
 
     Slidin.prototype.changeCurrentSlider = function(currentIndex) {
@@ -129,26 +139,21 @@
     Slidin.prototype.handlePrevSlider = function() {
         var self = this,
             currentIndex = self.getCurrentSlider();
-        if(currentIndex > 0) {
-            self.changeCurrentSlider(currentIndex-1);
-            self.moveSlider();
-        }
-        else {
-            //no idea
-        }
+
+        $(".dinamic-carousel .slider-row").animate({marginLeft: 0},1000,function(){
+            $(this).find(".slidin-slide:first").before($(this).find(".slidin-slide:last"));
+            $(this).css({marginLeft: -400});
+        });
     }
 
     Slidin.prototype.handleNextSlider = function() {
         var self = this,
             currentIndex = self.getCurrentSlider();
-        if(currentIndex < self.numOfSliders) {
-            self.changeCurrentSlider(currentIndex+1);
-            self.stopSlider();
-            self.playSlide();
-        }   
-        else {
-            //No idea
-        }
+ 
+        $(".dinamic-carousel .slider-row").animate({marginLeft:-400},1000,function(){
+            $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
+            $(this).css({marginLeft:0});
+        });
     }
 
     Slidin.prototype.init = function(creation) {
@@ -200,29 +205,14 @@
         console.log("In loop mode");
         var self = this,
             currentTransition = (-self.$slider.children().width())*self.getCurrentSlider();
-        
-        self.$slideTrack.css({
-            'width': (self.$slider.children().width() * (self.numOfSliders +1)) + 50
-        });
 
-        self.sliderAnimation = setInterval(function() {
-            currentIndex = self.getCurrentSlider();
-            currentTransition = (-400)*currentIndex;
-            if(currentIndex == (self.$sliderRow.children().length) -1) {
-                clearInterval(self.sliderAnimation);
-                $('.slidin-slide:last').after($('.slidin-slide:first')); 
-                currentIndex = 0;
-                self.loopMode();
-            }
-            else {
-                currentIndex++;
-                //$('.slidin-slide:last').after($('.slidin-slide:first')); 
-            }
-            self.$sliderRow.css({
-                'transform': 'translateX('+ currentTransition +'px)'
-            });
-            self.changeCurrentSlider(currentIndex);
-        }, self.options.speed);
+        self.numOfSliders = self.$sliderRow.children().length;
+        self.sliderAnimation = setInterval(function(){
+            $(".dinamic-carousel .slider-row").animate({marginLeft:-400},1000,function(){
+                $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
+                $(this).css({marginLeft:0});
+            })
+        },self.options.speed);
     }
 
     Slidin.prototype.moveSlider = function(currentTransition) {
@@ -234,35 +224,30 @@
         });
     }
 
+    /*Normal mode = manual scroll*/
     Slidin.prototype.normalMode = function() {
         var self = this;
-        self.sliderAnimation = setInterval(function() {
-            currentIndex = self.getCurrentSlider();
-            currentTransition = (-350)*currentIndex;
-            if(currentIndex == (self.$sliderRow.children().length) -1) {
-                clearInterval(self.sliderAnimation);
-            }
-            else {
-                currentIndex++;
-                $('.slidin-slide:last').after($('.slidin-slide:first')); 
-            }
-            self.changeCurrentSlider(currentIndex);
-        }, self.options.speed);
+       
     }
 
+    /*DONE*/
     Slidin.prototype.pauseHoverSlider = function() {
         var self = this,
             list = $('.slidin-list');
         
+
+            console.log("this is on hover");
         list.mouseover(function(){
-            clearInterval(self.sliderAnimation);
             console.log("Its on hover");
         });
         
         list.mouseout(function(){
-            console.log("Lets continuuu");
-            self.playSlide();
+            self.playSlide();     
         });
+    }
+
+    Slidin.prototype.restartSlider = function() {
+
     }
 
     Slidin.prototype.playSlide = function() {
@@ -271,9 +256,11 @@
             self.fadeMode();
         }
         else if(self.options.loop === true) {
+            console.log("loop mode here");
             self.loopMode();
         }
         else {
+            console.log("Normal mode here");
             self.normalMode();
         }
     }
@@ -301,35 +288,12 @@
             console.log("vertical");
         }
 
-        self.$sliderRow.children().each(function(index, element) {
-            if(self.$slider.children().width()>self.maxWidth) {
-                self.maxWidth=self.$slider.children().width() + 100;
-            }
-        });
-
-      //  self.carouselWidth = self.maxWidth * (self.numOfSliders);
-     //   self.$sliderRow.css("width", "100%");
-
         self.slidesNumber = self.$sliderRow.children().length;
         self.$slideTrack = (self.slidesNumber === 0) ?
             $('<div class="slidin-track"/>').appendTo(_.$slider) :
             self.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
 
         self.$slidersList = self.$slideTrack.wrap('<div class="slidin-list"/>').parent();    
-
-        if(self.options.adaptativeSlider === true) {
-            $('.slidin-slide').css('width', self.$slidersList .width());
-            $('.slidin-slide img').css('width', self.$slidersList.width());
-        }
-        else {
-            $('.slidin-slide').css('width', 'auto');
-        }
-        $('.slidin-slide img').width(self.$slidersList.width());
-
-        var normalImageHeight = $('.slidin-slide img').height();
-        $(self.$slider).css({
-            'height':  normalImageHeight,
-        });
     }
     
     Slidin.prototype.setDots = function() {
@@ -338,6 +302,20 @@
             $('.slidin-dots').css({
                 'display': 'none',
                 'visibility': 'hidden'
+            });
+        }
+    }
+
+    Slidin.prototype.setStyles = function() {
+        var self = this,
+            sliderArray = self.$sliderRow.children();
+
+        if(self.options.photoBorder) {
+            var customBorder = self.options.photoBorderDimension + "px solid " + self.options.photoBorderColor;
+            sliderArray.each(function() {
+                $(this).find('img').css({
+                    'border': customBorder  
+                });
             });
         }
     }
