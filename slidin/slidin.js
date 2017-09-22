@@ -425,20 +425,10 @@
         else { 
             var firstChildWidth = self.$sliderRow.children(':first').width() + (2*self.options.photoBorderDimension);
 
-            self.$slider.css({
-                'width': '50%'
-            });
 
             sliderArray.each(function() {
                 console.log(this);
-                /*
-                $(this).css({
-                    'width': '50%'
-                });
-                 $(this).find('img').css({
-                     'width': '100%'  
-                 });   
-                 */
+              
             });
         }
 
