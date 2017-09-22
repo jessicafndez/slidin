@@ -41,7 +41,6 @@
             .slidin-prev:before {
                 content: "\f060";
             }
-
             .slidin-prev:before, .slidin-next:before {
                 font-family: FontAwesome;
                 font-size: 25px;
@@ -51,12 +50,10 @@
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
             }
-
             .slidin {
                 width: 100%;
                 height: 100%;
             }
-
             .dinamic-carousel  {
                 position: absolute;
                 top: 40%;
@@ -66,13 +63,10 @@
                 width: 400px;
                 overflow:hidden;
             }
-
             .dinamic-carousel .slider-row {
-                width: 1920px;
                 padding: 0;
                 margin: 0;
             }
-
             .dinamic-carousel .slider-row .slidin-slide {
                 width:400px;
                 text-align: center;
@@ -80,14 +74,47 @@
                 list-style: none;
                 float:	left;
             }
+
+            .slidin-paginator {
+                display: none;
+                width: 100%;
+                padding-top: 10px;
+                margin: 0 auto;
+            }
+
+            .slidin-paginator-bullets {
+                width: auto;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .slidin-paginator-bullet {
+                width: 8px;
+                height: 8px;
+                display: inline-block;
+                border-radius: 100%;
+                background: #000;
+                opacity: .2;
+                padding: 3px;
+                margin: 5px;
+                cursor: pointer;
+            } 
+
+            .slidin-paginator-bullet-active {
+                background-color: #0080FF;
+                opacity: .9;
+            }
+
+            .slider-row {
+               /* width: 100%; */
+            }
+  
         </style>
     </head>
     <body>
         <div class="content">
             <div class="slidin"> 
-                <div class="prevArrow">
-                </div>
-
+                <div class="prevArrow"></div>
                 <div class="dinamic-carousel slider-block">
                     <div class="slider-row">
                         <div>
@@ -104,18 +131,9 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="nextArrow">
-                </div>
-   
-                <!--
-                <div class="slidin-dots">
-                    <ul>
-                        <li></li>
-                    </ul>
-                </div>
-                -->
+                <div class="nextArrow"></div>
             </div>
+            <div class="slidin-paginator"></div>
         </div>
         
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -129,14 +147,15 @@
                     centerAlign: true,
                     dots: true,
                     fade: false,
-                    loop: false,
+                    fullWidth: false,
+                    loop: true,
                     maxHeight: 'auto',
                     photoBorder: true,
                     photoBorderColor: '#ffffff',
                     photoBorderDimension: 10, //in px
                     slidesToScroll: 1,
                     slidesHorizontal: true,
-                    speed: 2000,
+                    speed: 3000,
                     responsiveSliders: true,
                     vertical: true,
                 });

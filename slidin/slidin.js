@@ -27,6 +27,7 @@
                 centerAlign: true,
                 dots: false,
                 fade: false,
+                fullWidth: true,
                 loop: false,
                 maxHeight: 5,
                 photoBorder: false,
@@ -64,8 +65,10 @@
         return Slidin;
     })();
 
+
     Slidin.prototype.loadAll = function() {
         var self = this;
+
         $(document).ready(function() {
             self.init(true);
             self.handleArrows();
@@ -75,8 +78,10 @@
         });
     }
 
+
     Slidin.prototype.autoPlay = function() {
         var self = this;
+
         if(self.options.autoPlay) {
             self.startSlider(); 
         }
@@ -85,9 +90,6 @@
         }
     }
 
-    Slidin.prototype.blind = function() {
-
-    }
 
     Slidin.prototype.build = function() {
         var self = this;
@@ -100,29 +102,139 @@
             $(element).attr('slider-index', index);
         });
 
+        $(".slider-row .slidin-slide:first").addClass('slider-selected');
+        self.cloneSliders();
         self.setDimension();
         self.setStyles();
 
-        //if its loop remove arrows, 4 now
         if(!self.options.loop) {
             $('.prevArrow').append(self.options.prevArrow);
             $('.nextArrow').append(self.options.nextArrow);
         }
+
+        self.paintDots();
+        self.paintActiveDot();
+
+        self.$sliderRow.css({
+            'transform': 'translateX(-'+ self.$sliderRow.children().width() +'px)'
+        });
     }
+
+
+    Slidin.prototype.cloneSliders = function() {
+        var self = this;
+
+        var firstClone = $(".slidin-slide:first").clone();
+        var lastClone = $(".slidin-slide:last").clone();
+        lastClone.prependTo($(".slider-row")).addClass("slider-clone").removeClass('slider-selected');
+        firstClone.appendTo($(".slider-row")).addClass("slider-clone").removeClass('slider-selected');
+    }
+
 
     Slidin.prototype.changeCurrentSlider = function(currentIndex) {
         var self = this;
+
         self.$sliderRow.children().removeClass("slider-selected");
         self.$sliderRow.children().eq(currentIndex).addClass("slider-selected");
         self.currentSlider = currentIndex;
     }
 
+
+    Slidin.prototype.dotsHandler = function() {
+        var self = this,
+        dotPressed = $('.slidin-paginator-bullet');
+
+        dotPressed.click(function(){
+            var dotIndex = $(this).attr('dot-index');
+            self.dotGoTo(dotIndex)
+        });
+    }
+    
+    /***** TO DO *****/
+    Slidin.prototype.dotGoTo = function(dotIndex) {
+        var self = this,
+            dotPressed = $('.slidin-paginator-bullet'),
+            animateSpeedTransition = self.options.speed/2;
+        
+        var sliderPosition = (-400)*dotIndex;
+        var sliderEnd = (-400)*(dotIndex-1);
+
+        //pause animation
+        clearInterval(self.sliderAnimation);
+
+        console.log("Sp: " + sliderPosition);
+
+        $('.dinamic-carousel .slider-row').animate({marginLeft: sliderPosition}, animateSpeedTransition, function() {
+            self.removeSelecteds();
+            self.removeClones();
+            $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));  
+            $('.slider-row .slidin-slide').eq(dotIndex -1).addClass('slider-selected');
+            self.cloneSliders();
+            self.paintActiveDot(); 
+            $(this).css({marginLeft: sliderEnd});
+        });
+        self.playSlide();
+    }
+
+
+    Slidin.prototype.paintActiveDot = function() {
+        var self = this;
+
+        if(self.options.dots) {
+            self.removeActiveDot();
+            var slidinSelected = $('.slidin-slide.slider-selected').attr('slider-index');
+            $('.slidin-paginator-bullet').eq(slidinSelected).addClass('slidin-paginator-bullet-active');
+        }
+    }
+
+
+    Slidin.prototype.paintNextActiveDot = function() {
+        var self = this;
+
+        if(self.options.dots) {
+            self.removeActiveDot();
+            var slidinSelected = $('.slidin-slide.slider-selected').attr('slider-index');
+            
+            slidinSelected++;
+            if(slidinSelected==(self.numOfSliders-2)) {
+                slidinSelected = 0;
+            }
+            
+            $('.slidin-paginator-bullet').eq(slidinSelected).addClass('slidin-paginator-bullet-active');
+        }
+    }
+
+
+    Slidin.prototype.paintDots = function() {
+        var self = this;
+
+        if(self.options.dots) {
+            $('.slidin-paginator').css({
+                'display': 'block'
+            });
+            
+            $('<div class="slidin-paginator-bullets"/>').appendTo('.slidin-paginator');
+            for(var i=0; i<self.numOfSliders+1; i++) {
+                $('<div class="slidin-paginator-bullet"/>').appendTo('.slidin-paginator-bullets');
+            }
+
+            $('.slidin-paginator-bullets').children().each(function(index, element) {
+                $(element).attr('dot-index', index);
+            });
+
+            self.dotsHandler();
+        }   
+    }
+
+
     Slidin.prototype.getCurrentSlider = function() {
         return this.currentSlider;
     }
 
+
     Slidin.prototype.handleArrows = function() {
         var self = this;
+
         self.leftArrow = $('.slidin-prev');
         self.rightArrow = $('.slidin-next');
         self.setArrows();
@@ -136,109 +248,89 @@
         });
     }
 
+
     Slidin.prototype.handlePrevSlider = function() {
         var self = this,
-            currentIndex = self.getCurrentSlider();
+            slidersWidth = self.$sliderRow.children().width();
 
-        $(".dinamic-carousel .slider-row").animate({marginLeft: 0},1000,function(){
+        $(".dinamic-carousel .slider-row").animate({marginLeft: slidersWidth}, 1000, function() {
+            self.removeSelecteds();
+            self.removeClones();
             $(this).find(".slidin-slide:first").before($(this).find(".slidin-slide:last"));
-            $(this).css({marginLeft: -400});
+            $(".slider-row .slidin-slide:first").addClass('slider-selected');
+            self.cloneSliders();
+            self.paintActiveDot(); 
+            $(this).css({marginLeft: 0});
         });
     }
+
 
     Slidin.prototype.handleNextSlider = function() {
         var self = this,
-            currentIndex = self.getCurrentSlider();
+            slidersWidth = self.$sliderRow.children().width();
  
-        $(".dinamic-carousel .slider-row").animate({marginLeft:-400},1000,function(){
+        $(".dinamic-carousel .slider-row").animate({marginLeft: -slidersWidth}, 1000, function() {
+            self.removeSelecteds();
+            self.removeClones();
             $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
-            $(this).css({marginLeft:0});
+            $(".slider-row .slidin-slide:first").addClass('slider-selected');
+            self.cloneSliders();
+            self.paintActiveDot(); 
+            $(this).css({marginLeft: -0});
         });
     }
 
+
     Slidin.prototype.init = function(creation) {
         var self = this;
+
         if (!$(self.$slider).hasClass('slidin-initialized')) {
             $(self.$slider).addClass('slidin-initialized');
             self.build();
         }
     };
 
+
     Slidin.prototype.fadeMode = function() {
         var self = this;   
+    }
+
+
+    Slidin.prototype.loopMode = function() {
+        var self = this,
+            animateSpeedTransition = self.options.speed/2;
+
+        var movementX = self.$sliderRow.children(':first').width() * (-1);
+        console.log("R: " + self.$sliderRow.width());
+
+        console.log("W: " + movementX);
+
+        self.numOfSliders = self.$sliderRow.children().length;
         self.sliderAnimation = setInterval(function() {
-            currentIndex = self.getCurrentSlider();
-
-            if (currentIndex == (self.$sliderRow.children().length) - 1) {
-                currentIndex = 0;
-            } else {
-                currentIndex++;
-            }
-
-            /*
-            $('.slidin-slide:first').fadeIn('slow', function(){
-                $('.slidin-slide:last').after($('.slidin-slide:first')); 
+            $(".dinamic-carousel .slider-row").animate({marginLeft: movementX}, animateSpeedTransition, function() {
+                self.removeSelecteds();
+                self.removeClones();
+                $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
+                $(".slider-row .slidin-slide:first").addClass('slider-selected');
+                self.cloneSliders();
+                self.paintActiveDot(); 
+                $(this).css({marginLeft: -0});
             });
-            */
-            /*
-            $(".slidin-slide:first").slideUp(function() {
-                $(this).insertBefore(".slidin-slide:last").slideDown();
-            });
-            */
-
-            var fadeSpeed = parseInt(self.options.speed/2, 10);
-            /*
-            $('.slidin-slide:first').fadeOut(fadeSpeed);
-            $('.slidin-slide:last').after($('.slidin-slide:first'));
-            $('.slidin-slide:first').fadeIn(fadeSpeed);
-            */
-
-            $('.slidin-slide:first').fadeOut(fadeSpeed);
-            $('.slidin-slide:last').after($('.slidin-slide:first'));
-            $('.slidin-slide:first').fadeIn(fadeSpeed - 100);
-       
-            self.changeCurrentSlider(currentIndex);
         }, self.options.speed);
     }
 
-    Slidin.prototype.loopMode = function() {
-        console.log("In loop mode");
-        var self = this,
-            currentTransition = (-self.$slider.children().width())*self.getCurrentSlider();
-
-        self.numOfSliders = self.$sliderRow.children().length;
-        self.sliderAnimation = setInterval(function(){
-            $(".dinamic-carousel .slider-row").animate({marginLeft:-400},1000,function(){
-                $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
-                $(this).css({marginLeft:0});
-            })
-        },self.options.speed);
-    }
-
-    Slidin.prototype.moveSlider = function(currentTransition) {
-        var self = this,
-            currentTransition = (-350)*self.getCurrentSlider();
-        console.log("Moving animation");
-        self.$sliderRow.css({
-            'transform': 'translateX('+ currentTransition +'px)'
-        });
-    }
-
-    /*Normal mode = manual scroll*/
+  
     Slidin.prototype.normalMode = function() {
         var self = this;
-       
     }
 
-    /*DONE*/
+
     Slidin.prototype.pauseHoverSlider = function() {
         var self = this,
             list = $('.slidin-list');
         
-
-            console.log("this is on hover");
         list.mouseover(function(){
-            console.log("Its on hover");
+            self.stopSlider();
         });
         
         list.mouseout(function(){
@@ -246,12 +338,25 @@
         });
     }
 
-    Slidin.prototype.restartSlider = function() {
 
+    Slidin.prototype.removeSelecteds = function() {
+        this.$sliderRow.children().removeClass("slider-selected");
     }
+
+
+    Slidin.prototype.removeClones = function() {
+        this.$sliderRow.find(".slider-clone").remove()
+    }
+
+
+    Slidin.prototype.removeActiveDot = function() {
+        $('.slidin-paginator-bullets').children().removeClass("slidin-paginator-bullet-active");
+    }
+
 
     Slidin.prototype.playSlide = function() {
         var self = this;
+
         if(self.options.fade === true) {
             self.fadeMode();
         }
@@ -265,8 +370,10 @@
         }
     }
 
+
     Slidin.prototype.setArrows = function() {
         var self = this;
+
         if(!self.options.arrows) {
             $('.slidin-arrow').css({
                 'display': 'none',
@@ -275,8 +382,11 @@
         }
     }
 
+
     Slidin.prototype.setDimension = function() {
-        var self = this;
+        var self = this,
+            sliderArray = self.$sliderRow.children();
+
         if(self.options.vertical === false) {
             if (self.options.centerAlign === true) {
                 self.$list.css({
@@ -287,17 +397,73 @@
         else {
             console.log("vertical");
         }
+        
+        //if not autosize
+        if(self.options.fullWidth) {
+            var slidinW = $('.slidin').width();
+            $('.slidin').css({
+                'left': '0',
+                'padding-top': 'auto',
+                'margin-left': '0px'
+            });
+
+            console.log("SW: " + slidinW);
+
+            
+            sliderArray.each(function() {
+               console.log(this);
+                $(this).find('img').css({
+                    'width': '100%'  
+                });
+            });
+
+            self.$slider.css({
+                'width': '100%'
+            });
+ 
+        }
+        else { 
+            var firstChildWidth = self.$sliderRow.children(':first').width() + (2*self.options.photoBorderDimension);
+
+            self.$slider.css({
+                'width': '50%'
+            });
+
+            sliderArray.each(function() {
+                console.log(this);
+                /*
+                $(this).css({
+                    'width': '50%'
+                });
+                 $(this).find('img').css({
+                     'width': '100%'  
+                 });   
+                 */
+            });
+        }
 
         self.slidesNumber = self.$sliderRow.children().length;
-        self.$slideTrack = (self.slidesNumber === 0) ?
-            $('<div class="slidin-track"/>').appendTo(_.$slider) :
-            self.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
+        
+                var sliderWidth = $('.dinamic-carousel .slider-row').children().width();
+                var totalSlidersWidth = sliderWidth * self.slidesNumber;
+        
+                $(".dinamic-carousel .slider-row").css({
+                    'width': totalSlidersWidth
+                });
+                
+                self.$slideTrack = (self.slidesNumber === 0) ?
+                    $('<div class="slidin-track"/>').appendTo(_.$slider) :
+                    self.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
+        
+                self.$slidersList = self.$slideTrack.wrap('<div class="slidin-list"/>').parent();    
+        
 
-        self.$slidersList = self.$slideTrack.wrap('<div class="slidin-list"/>').parent();    
     }
     
+
     Slidin.prototype.setDots = function() {
         var self = this;
+
         if(!self.options.dots) {
             $('.slidin-dots').css({
                 'display': 'none',
@@ -305,6 +471,7 @@
             });
         }
     }
+
 
     Slidin.prototype.setStyles = function() {
         var self = this,
@@ -320,15 +487,18 @@
         }
     }
 
+
     Slidin.prototype.slidersEffects = function() {
         var self = this;
 
     }
 
+
     Slidin.prototype.stopSlider = function() {
         var self = this;
         clearInterval(self.sliderAnimation);
     }
+
 
     Slidin.prototype.startSlider = function() {
         var self = this,
@@ -340,6 +510,7 @@
         self.playSlide();
     }
 
+
     $.fn.slidin = function() {
         var self = this,
             opt = arguments[0],
@@ -347,6 +518,7 @@
             l = self.length,
             i,
             ret;
+
         for (i = 0; i < l; i++) {
             if (typeof opt == 'object' || typeof opt == 'undefined')
                 self[i].slick = new Slidin(self[i], opt);
