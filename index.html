@@ -54,11 +54,11 @@
             }
             .dinamic-carousel  {
                 position: absolute;
-                padding-top: 18%;
+                padding-top: 12%;
                 left: 40%;
                 margin-top: -50px;
                 margin-left: -50px;
-                width: 400px;
+                width: 410px;
                 overflow:hidden;
             }
             .dinamic-carousel .slider-row {
@@ -71,12 +71,13 @@
                 height: 280px;
                 list-style: none;
                 float:	left;
+               /* margin-right: 20px;*/
             }
 
             .slidin-paginator {
                 display: none;
                 width: 100%;
-                padding-top: 10px;
+                padding-top: 50px;
                 margin: 0 auto;
             }
 
@@ -140,13 +141,14 @@
             $(document).ready(function() {
                 $(".dinamic-carousel").slidin({
                     adaptativeSlider: true,
-                    autoPlay: true,
+                    autoPlay: false,
                     arrows: true,
                     centerAlign: true,
                     dots: true,
                     fade: false,
-                    fullWidth: false,
-                    loop: true,
+                    fullWidth: true,
+                    loop: false,
+                    marginInSliders: 10, //if not->0; max: 15
                     maxHeight: 'auto',
                     photoBorder: true,
                     photoBorderColor: '#ffffff',

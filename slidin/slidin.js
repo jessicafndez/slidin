@@ -29,6 +29,7 @@
                 fade: false,
                 fullWidth: true,
                 loop: false,
+                marginInSliders: 1,
                 maxHeight: 5,
                 photoBorder: false,
                 photoBorderColor: '#ffffff',
@@ -59,6 +60,8 @@
             self.sliderAnimation = "";
             dataSettings = $(element).data('slidin') || {};
             self.options = $.extend({}, self.defaults, settings, dataSettings);
+
+            self.initialNumSliders = 0;
 
             self.loadAll();
         }
@@ -98,6 +101,9 @@
         self.numOfSliders -= 1;
         $(self.$sliderRow).children().addClass('slidin-slide');
 
+        self.initialNumSliders = self.$sliderRow.children().length;
+        console.log("Initial: " + self.initialNumSliders);
+
         self.$sliderRow.children().each(function(index, element) {
             $(element).attr('slider-index', index);
         });
@@ -118,6 +124,42 @@
         self.$sliderRow.css({
             'transform': 'translateX(-'+ self.$sliderRow.children().width() +'px)'
         });
+    }
+
+
+    Slidin.prototype.buildCarousel = function(indexStart) {
+        var self = this,
+            animateSpeedTransition = self.options.speed/2;
+
+        var newIndex = parseInt(indexStart);
+
+        var movementX = self.$sliderRow.children(':first').width() * (-1 * newIndex) - (self.options.marginInSliders*2);
+        var movementLeft = movementX + self.$sliderRow.children(':first').width() - (self.options.marginInSliders*2);
+
+        clearInterval(self.sliderAnimation);
+
+        console.log("--------------------------");
+        console.log("go to: " + indexStart);
+        console.log("MovementStart: " + movementX);
+        console.log("movementEnd: " + movementLeft);
+        console.log("--------------------------");
+
+        self.numOfSliders = self.$sliderRow.children().length;
+
+        //This is to go next
+        $(".dinamic-carousel .slider-row").animate({marginLeft: movementX}, animateSpeedTransition, function() {
+            self.removeSelecteds();
+            self.removeClones();
+            $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
+          //  $(".slider-row .slidin-slide:first").addClass('slider-selected');
+            self.$sliderRow.children().eq(indexStart -1).addClass("slider-selected");
+            self.cloneSliders();
+            self.paintActiveDotSwap(indexStart); 
+            $(this).css({marginLeft: movementLeft});
+        });
+
+        //This is go back
+
     }
 
 
@@ -150,30 +192,40 @@
         });
     }
     
-    /***** TO DO *****/
+    /***** DOING *****/
     Slidin.prototype.dotGoTo = function(dotIndex) {
         var self = this,
-            dotPressed = $('.slidin-paginator-bullet'),
             animateSpeedTransition = self.options.speed/2;
-        
-        var sliderPosition = (-400)*dotIndex;
-        var sliderEnd = (-400)*(dotIndex-1);
 
-        //pause animation
+        var newIndex = parseInt(dotIndex);
+        var movementDiff = newIndex - actualX;
+        var actualX = parseInt($('.slidin-slide.slider-selected').attr('slider-index')); 
+        var movementX = (self.$sliderRow.children(':first').width() * (-1 * newIndex) - (self.options.marginInSliders*(newIndex + 1))  
+            - (self.$sliderRow.children(':first').width()*(-1*actualX)));
+       
+        var movementLeft = movementX + self.$sliderRow.children(':first').width() + (self.options.marginInSliders*(actualX));
+
+
         clearInterval(self.sliderAnimation);
 
-        console.log("Sp: " + sliderPosition);
+        console.log("--------------------------");
+        console.log("go to: " + newIndex);
+        console.log("Actual: " + actualX);
+        console.log("MovementStart: " + movementX);
+        console.log("movementEnd: " + movementLeft);
+        console.log("--------------------------");
 
-        $('.dinamic-carousel .slider-row').animate({marginLeft: sliderPosition}, animateSpeedTransition, function() {
+        //This is to go next
+        $(".dinamic-carousel .slider-row").animate({marginLeft: movementX}, animateSpeedTransition, function() {
             self.removeSelecteds();
             self.removeClones();
-            $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));  
-            $('.slider-row .slidin-slide').eq(dotIndex -1).addClass('slider-selected');
+            $(this).find(".slidin-slide:last").after($(this).find(".slidin-slide:first"));
+            $(".slider-row .slidin-slide:first").addClass('slider-selected');
+            //self.$sliderRow.children().eq(dotIndex -1).addClass("slider-selected");
             self.cloneSliders();
-            self.paintActiveDot(); 
-            $(this).css({marginLeft: sliderEnd});
+            self.paintActiveDotSwap(newIndex); 
+            $(this).css({marginLeft: movementLeft});
         });
-        self.playSlide();
     }
 
 
@@ -185,6 +237,14 @@
             var slidinSelected = $('.slidin-slide.slider-selected').attr('slider-index');
             $('.slidin-paginator-bullet').eq(slidinSelected).addClass('slidin-paginator-bullet-active');
         }
+    }
+
+
+    Slidin.prototype.paintActiveDotSwap = function(index) {
+        var self = this;
+
+        self.removeActiveDot();
+        $('.slidin-paginator-bullet').eq(index).addClass('slidin-paginator-bullet-active');
     }
 
 
@@ -268,6 +328,8 @@
     Slidin.prototype.handleNextSlider = function() {
         var self = this,
             slidersWidth = self.$sliderRow.children().width();
+
+        console.log("Moving: " + slidersWidth);
  
         $(".dinamic-carousel .slider-row").animate({marginLeft: -slidersWidth}, 1000, function() {
             self.removeSelecteds();
@@ -300,7 +362,7 @@
         var self = this,
             animateSpeedTransition = self.options.speed/2;
 
-        var movementX = self.$sliderRow.children(':first').width() * (-1);
+        var movementX = self.$sliderRow.children(':first').width() * (-1) - (self.options.marginInSliders*2);
         console.log("R: " + self.$sliderRow.width());
 
         console.log("W: " + movementX);
@@ -319,6 +381,22 @@
         }, self.options.speed);
     }
 
+
+    Slidin.prototype.loopModeDotsPosition = function(indexPosition) {
+        var self = this,
+        animateSpeedTransition = self.options.speed/2;
+
+        var movementX = self.$sliderRow.children(':first').width() * (-1) * indexPosition - (self.options.marginInSliders*2);
+  
+        console.log("------------");
+        console.log("W: " + movementX);
+        console.log("-------------");
+
+        self.numOfSliders = self.$sliderRow.children().length;
+
+        self.buildCarousel(indexPosition);
+    }
+
   
     Slidin.prototype.normalMode = function() {
         var self = this;
@@ -329,6 +407,8 @@
         var self = this,
             list = $('.slidin-list');
         
+
+        /*
         list.mouseover(function(){
             self.stopSlider();
         });
@@ -336,6 +416,7 @@
         list.mouseout(function(){
             self.playSlide();     
         });
+        */
     }
 
 
@@ -398,56 +479,74 @@
             console.log("vertical");
         }
         
-        //if not autosize
         if(self.options.fullWidth) {
-            var slidinW = $('.slidin').width();
+            var slidinW = $('.slidin-slide').eq(1).width() + (self.options.photoBorderDimension*2) + 20;
+            var slidinH = $('.slidin-slide').eq(1).height() + 50;
+
             $('.slidin').css({
-                'left': '0',
                 'padding-top': 'auto',
-                'margin-left': '0px'
+                'margin-left': '0px',
+                'height': slidinH
             });
 
-            console.log("SW: " + slidinW);
-
-            
             sliderArray.each(function() {
-               console.log(this);
                 $(this).find('img').css({
                     'width': '100%'  
                 });
             });
-
-            self.$slider.css({
-                'width': '100%'
-            });
- 
         }
         else { 
             var firstChildWidth = self.$sliderRow.children(':first').width() + (2*self.options.photoBorderDimension);
-
-
             sliderArray.each(function() {
                 console.log(this);
               
             });
         }
 
-        self.slidesNumber = self.$sliderRow.children().length;
-        
-                var sliderWidth = $('.dinamic-carousel .slider-row').children().width();
-                var totalSlidersWidth = sliderWidth * self.slidesNumber;
-        
-                $(".dinamic-carousel .slider-row").css({
-                    'width': totalSlidersWidth
+        self.$sliderRow.children().each(function(index, element) {
+            if(self.options.marginInSliders>0) {
+                $(element).css({
+                    'margin': '10px',
+                    'margin-left': self.options.marginInSliders + self.options.photoBorderDimension,
                 });
-                
-                self.$slideTrack = (self.slidesNumber === 0) ?
-                    $('<div class="slidin-track"/>').appendTo(_.$slider) :
-                    self.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
-        
-                self.$slidersList = self.$slideTrack.wrap('<div class="slidin-list"/>').parent();    
-        
+            }
+        });
 
+        if(self.options.marginInSliders>0) {
+            var singleSliderWidth = self.$sliderRow.children().width() 
+            + (self.options.marginInSliders * 2)
+            + (self.options.photoBorderDimension * 2);
+            var singleSliderMargin = (self.options.marginInSliders*2) + (self.options.photoBorderDimension*2);
+        }
+        else {
+            var singleSliderWidth = self.$sliderRow.children().width() + self.options.photoBorderDimension;
+            var singleSliderMargin = 0;
+        }
+
+        self.$slider.css({
+            'width': singleSliderWidth
+        });
+        
+        self.slidesNumber = self.$sliderRow.children().length;
+
+        var sliderWidth = self.$sliderRow.children().width();
+        var totalSlidersWidth = sliderWidth * self.slidesNumber 
+        + (self.options.marginInSliders*self.slidesNumber*2)
+        + (self.options.photoBorderDimension*self.slidesNumber*2);
+
+        $(".dinamic-carousel .slider-row").css({
+            'width': totalSlidersWidth
+        });
+        
+        self.$slideTrack = (self.slidesNumber === 0) ?
+            $('<div class="slidin-track"/>').appendTo(_.$slider) :
+            self.$sliderRow.wrapAll('<div class="slidin-track"/>').parent();
+
+        self.$slidersList = self.$slideTrack.wrap('<div class="slidin-list"/>').parent();    
+
+        $('.slidin-list').css({
+            'margin-left': -singleSliderMargin
+        });
     }
     
 
